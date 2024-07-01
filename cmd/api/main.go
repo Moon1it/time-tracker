@@ -1,16 +1,22 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"time-tracker/internal/config"
+	"time-tracker/internal/handlers"
 	"time-tracker/internal/server"
 )
 
 func main() {
-
-	server := server.NewServer()
-
-	err := server.ListenAndServe()
+	cfg, err := config.NewConfig()
 	if err != nil {
-		panic(fmt.Sprintf("cannot start server: %s", err))
+		log.Fatalf("error loading env variables: %s", err.Error())
+	}
+
+	handler := handlers.NewHandler()
+
+	srv := new(server.Server)
+	if err := srv.Run(cfg.ServerPort, handler); err != nil {
+		log.Fatalf("error occured while running http server: %s", err.Error())
 	}
 }

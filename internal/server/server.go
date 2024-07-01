@@ -1,39 +1,27 @@
 package server
 
 import (
-	"fmt"
+	"context"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
-
-	_ "github.com/joho/godotenv/autoload"
-
-	"time-tracker/internal/database"
+	"time-tracker/internal/handlers"
 )
 
 type Server struct {
-	port int
-
-	db database.Service
+	httpServer *http.Server
 }
 
-func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	NewServer := &Server{
-		port: port,
-
-		db: database.New(),
+func (s *Server) Run(port string, handler *handlers.Handler) error {
+	s.httpServer = &http.Server{
+		Addr:           ":" + port,
+		Handler:        s.RegisterRoutes(handler),
+		MaxHeaderBytes: 1 << 20, // 1 MB
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
 	}
+	return s.httpServer.ListenAndServe()
+}
 
-	// Declare Server config
-	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
-	}
-
-	return server
+func (s *Server) Shutdown(ctx context.Context) error {
+	return s.httpServer.Shutdown(ctx)
 }
