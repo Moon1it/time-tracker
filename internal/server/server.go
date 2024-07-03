@@ -4,14 +4,14 @@ import (
 	"context"
 	"net/http"
 	"time"
-	"time-tracker/internal/handlers"
+	"time-tracker/internal/handler"
 )
 
 type Server struct {
 	httpServer *http.Server
 }
 
-func (s *Server) Run(port string, handler *handlers.Handler) error {
+func (s *Server) Run(port string, handler *handler.Handler) error {
 	s.httpServer = &http.Server{
 		Addr:           ":" + port,
 		Handler:        s.RegisterRoutes(handler),

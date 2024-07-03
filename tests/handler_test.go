@@ -4,13 +4,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time-tracker/internal/handlers"
+	"time-tracker/internal/handler"
 
 	"github.com/gin-gonic/gin"
 )
 
 func TestHelloWorldHandler(t *testing.T) {
-	h := &handlers.Handler{}
+	h := &handler.Handler{}
 	r := gin.New()
 	r.GET("/", h.HelloWorldHandler)
 	// Create a test HTTP request
