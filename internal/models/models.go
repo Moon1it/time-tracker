@@ -4,21 +4,31 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type CreatePeoplePayload struct {
-	PassportNumber string `json:"passportNumber"`
+type CreateUserPayload struct {
+	PassportNumber string  `json:"passportNumber"`
+	Surname        string  `json:"surname"`
+	Name           string  `json:"name"`
+	Patronymic     *string `json:"patronymic"`
+	Address        string  `json:"address"`
 }
 
-type People struct {
-	ID             uuid.UUID   `db:"id"`
-	PassportSerie  int         `db:"passport_serie"`
-	PassportNumber int         `db:"passport_number"`
-	Surname        pgtype.Text `db:"surname"`
-	Name           pgtype.Text `db:"name"`
-	Patronymic     pgtype.Text `db:"patronymic"`
-	Address        pgtype.Text `db:"address"`
-	CreatedAt      time.Time   `db:"created_at"`
-	UpdatedAt      time.Time   `db:"updated_at"`
+type UpdateUserPayload struct {
+	PassportNumber *string `json:"passportNumber"`
+	Surname        *string `json:"surname"`
+	Name           *string `json:"name"`
+	Patronymic     *string `json:"patronymic"`
+	Address        *string `json:"address"`
+}
+
+type User struct {
+	UUID           uuid.UUID `json:"uuid"`
+	PassportNumber string    `json:"passportNumber"`
+	Surname        string    `json:"surname"`
+	Name           string    `json:"name"`
+	Patronymic     *string   `json:"patronymic"`
+	Address        string    `json:"address"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }

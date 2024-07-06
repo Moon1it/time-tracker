@@ -3,10 +3,11 @@ package main
 import (
 	"log"
 	"time-tracker/internal/config"
+	repository "time-tracker/internal/db/sqlc"
 	"time-tracker/internal/handler"
-	"time-tracker/internal/repository"
 	"time-tracker/internal/server"
 	"time-tracker/internal/service"
+	"time-tracker/pkg/database"
 )
 
 func main() {
@@ -14,18 +15,18 @@ func main() {
 	if err != nil {
 		log.Fatalf("error loading env variables: %s", err.Error())
 	}
-	db, err := repository.NewPostgresDB(cfg)
+	pgxPool, err := database.NewPostgresDB(cfg)
 	if err != nil {
 		log.Fatalf("error loading env variables: %s", err.Error())
 	}
-	defer db.Close()
+	defer pgxPool.Close()
 
-	repo := repository.NewRepository(db)
-	service := service.NewService(repo)
-	handler := handler.NewHandler(service)
+	newRepository := repository.New(pgxPool)
+	newService := service.NewService(newRepository)
+	newHandler := handler.NewHandler(newService)
 
 	srv := new(server.Server)
-	if err := srv.Run(cfg.ServerPort, handler); err != nil {
+	if err := srv.Run(cfg.ServerPort, newHandler); err != nil {
 		log.Fatalf("error occured while running http server: %s", err.Error())
 	}
 }

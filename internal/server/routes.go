@@ -12,31 +12,24 @@ func (s *Server) RegisterRoutes(h *handler.Handler) http.Handler {
 
 	api := r.Group("/api")
 	{
-		api.POST("/people", h.CreatePeople)
-		api.GET("/info", h.GetPeople)
+		// api.GET("/users/:id/workloads", h.GetUserWorkloads) // Получение трудозатрат по пользователю за период
+		// api.POST("/users/:id/tasks/start", h.StartTask)     // Начать отсчет времени по задаче для пользователя
+		// api.POST("/users/:id/tasks/stop", h.StopTask)       // Закончить отсчет времени по задаче для пользователя
 
-		// users := api.Group("/users")
-		// {
-		// 	users.POST("/", h.CreateUser)
-		// 	users.GET("/", h.GetUsers)
-		// 	users.GET("/:id", h.GetUser)
-		// 	users.PUT("/:id", h.UpdateUser)
-		// 	users.DELETE("/:id", h.DeleteUser)
+		// api.GET("/info", h.GetUserByPassportNumber)
 
-		// 	// tasks.GET("/:id/tasks/stop", h.HelloWorldHandler)
-		// }
-		// // :id/execution-times
+		api.POST("/users", h.CreateUser)         // Добавление нового пользователя
+		api.GET("/users", h.GetUsers)            // Получение данных пользователей с фильтрацией и пагинацией
+		api.GET("/users/:uuid", h.GetUser)       // Добавление нового пользователя
+		api.PATCH("/users/:uuid", h.UpdateUser)  // Изменение данных пользователя
+		api.DELETE("/users/:uuid", h.DeleteUser) // Удаление пользователя
 
-		// tasks := users.Group("/tasks")
-		// {
-
-		// 	tasks.POST("/", h.CreateTask)
-		// 	tasks.GET("/", h.HelloWorldHandler)
-		// 	tasks.GET("/:id", h.HelloWorldHandler)
-		// 	tasks.DELETE("/:id", h.HelloWorldHandler)
-		// }
-		api.GET("/", h.HelloWorldHandler)
 	}
 
 	return r
 }
+
+// api.GET("/users", h.GetUsers)                         // Получение списка пользователей с фильтрацией и пагинацией
+// api.GET("/user/time-tracking", h.GetUserTimeTracking) // Получение трудозатрат по пользователю за период
+// api.POST("/user/start-task", h.StartTask)             // Начало отсчета времени по задаче для пользователя
+// api.POST("/user/stop-task", h.StopTask)               // Завершение отсчета времени по задаче для пользователя
