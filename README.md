@@ -13,3 +13,35 @@ This project was developed as a part of a test assignment for Effective Mobile f
 - Filtering and pagination
 - Integration with an external API
 - PostgreSQL database for data storage
+
+## Getting Started
+
+Follow these instructions to set up and run the project locally.
+
+### Prerequisites
+
+Ensure you have the following installed:
+- Docker
+- Docker Compose
+
+### Setup
+
+1. **Create .env File**
+   - Copy the contents of the `app.example.env` file.
+   - Create a new file named `.env` in the root directory.
+   - Paste the copied contents into the `.env` file.
+  
+2. **Build and Run the Project**
+   - Open a terminal and navigate to the root directory of the project.
+   - Run the following command to build and start the project:
+     ```bash
+     docker-compose up
+     ```
+   - Docker Compose will handle building and starting the services defined in the `docker-compose.yml` file.
+
+3. **Access the Documentation**
+   - When the project is running, open your web browser and navigate to:
+     ```
+     http://localhost:8000/swagger/index.html
+     ```
+   - Explore the Swagger documentation to familiarize yourself with the functionality of the application.
