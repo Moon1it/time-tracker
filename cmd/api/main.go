@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	_ "time-tracker/docs"
 	"time-tracker/internal/config"
 	repository "time-tracker/internal/db/sqlc"
 	"time-tracker/internal/handler"
@@ -9,6 +10,13 @@ import (
 	"time-tracker/internal/service"
 	"time-tracker/pkg/database"
 )
+
+// @title Time Tracker API
+// @version 1.0
+// @description API Server for Time Tracker Application
+
+// @host localhost:8000
+// @BasePath /
 
 func main() {
 	cfg, err := config.NewConfig()

@@ -8,16 +8,8 @@ import (
 )
 
 type Config struct {
-	DBConfig   DBConfig
+	DBSource   string
 	ServerPort string
-}
-
-type DBConfig struct {
-	Host     string
-	User     string
-	Password string
-	DBName   string
-	Port     string
 }
 
 func getEnv(key string) (string, error) {
@@ -33,27 +25,7 @@ func NewConfig() (*Config, error) {
 		return nil, fmt.Errorf("error loading .env file: %w", err)
 	}
 
-	dbHost, err := getEnv("DB_HOST")
-	if err != nil {
-		return nil, err
-	}
-
-	dbUser, err := getEnv("DB_USER")
-	if err != nil {
-		return nil, err
-	}
-
-	dbPassword, err := getEnv("DB_PASSWORD")
-	if err != nil {
-		return nil, err
-	}
-
-	dbName, err := getEnv("DB_NAME")
-	if err != nil {
-		return nil, err
-	}
-
-	dbPort, err := getEnv("DB_PORT")
+	dbSource, err := getEnv("DB_SOURCE")
 	if err != nil {
 		return nil, err
 	}
@@ -64,13 +36,7 @@ func NewConfig() (*Config, error) {
 	}
 
 	return &Config{
-		DBConfig: DBConfig{
-			Host:     dbHost,
-			User:     dbUser,
-			Password: dbPassword,
-			DBName:   dbName,
-			Port:     dbPort,
-		},
+		DBSource:   dbSource,
 		ServerPort: serverPort,
 	}, nil
 }

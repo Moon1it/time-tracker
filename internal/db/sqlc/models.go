@@ -8,13 +8,29 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Task struct {
+	Uuid      pgtype.UUID        `json:"uuid"`
+	UserUuid  pgtype.UUID        `json:"user_uuid"`
+	Name      string             `json:"name"`
+	StartTime pgtype.Timestamptz `json:"start_time"`
+	EndTime   pgtype.Timestamptz `json:"end_time"`
+}
+
+type TaskHistory struct {
+	Uuid      pgtype.UUID        `json:"uuid"`
+	UserUuid  pgtype.UUID        `json:"user_uuid"`
+	Name      string             `json:"name"`
+	StartTime pgtype.Timestamptz `json:"start_time"`
+	EndTime   pgtype.Timestamptz `json:"end_time"`
+}
+
 type User struct {
-	Uuid           pgtype.UUID      `json:"uuid"`
-	PassportNumber string           `json:"passport_number"`
-	Surname        string           `json:"surname"`
-	Name           string           `json:"name"`
-	Patronymic     pgtype.Text      `json:"patronymic"`
-	Address        string           `json:"address"`
-	CreatedAt      pgtype.Timestamp `json:"created_at"`
-	UpdatedAt      pgtype.Timestamp `json:"updated_at"`
+	Uuid           pgtype.UUID        `json:"uuid"`
+	PassportNumber string             `json:"passport_number"`
+	Surname        string             `json:"surname"`
+	Name           string             `json:"name"`
+	Patronymic     pgtype.Text        `json:"patronymic"`
+	Address        string             `json:"address"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
 }

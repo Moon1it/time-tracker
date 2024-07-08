@@ -15,8 +15,10 @@ import (
 )
 
 var (
-	ErrDuplicateEntry = errors.New("user with this passport series and number already exists")
-	ErrNoRows         = errors.New("no user found with this passport series and number")
+	ErrUserNotFound        = errors.New("user not found")
+	ErrUserAlreadyExists   = errors.New("user already exists")
+	ErrUsersNotFound       = errors.New("no users found")
+	ErrForeignKeyViolation = errors.New("foreign key violation")
 )
 
 type UserService struct {
@@ -46,14 +48,14 @@ func (ps *UserService) CreateUser(ctx context.Context, payload *models.CreateUse
 	userRaw, err := ps.repository.CreateUser(ctx, params)
 	if err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" {
-			return nil, ErrDuplicateEntry
+			return nil, ErrUserAlreadyExists
 		}
-		return nil, fmt.Errorf("failed to create user: %w", err)
+		return nil, err
 	}
 
 	user, err := utils.ConvertDBUserToModelsUser(userRaw)
 	if err != nil {
-		return nil, fmt.Errorf("Error converting user: %v", err)
+		return nil, fmt.Errorf("error converting user: %v", err)
 	}
 
 	return user, nil
@@ -83,14 +85,14 @@ func (ps *UserService) GetUsers(ctx context.Context, limit, offset int, filters 
 
 	usersRaw, err := ps.repository.GetUsers(ctx, params)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, ErrNoRows
-		}
-		return nil, fmt.Errorf("failed to get users: %w", err)
+		return nil, err
+	}
+
+	if len(usersRaw) == 0 {
+		return nil, ErrUsersNotFound
 	}
 
 	users := make([]models.User, len(usersRaw))
-
 	for i, userRaw := range usersRaw {
 		user, err := utils.ConvertDBUserToModelsUser(userRaw)
 		if err != nil {
@@ -107,9 +109,9 @@ func (ps *UserService) GetUserByUUID(ctx context.Context, UUID uuid.UUID) (*mode
 	userRaw, err := ps.repository.GetUserByUUID(ctx, pgUUID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, ErrNoRows
+			return nil, ErrUserNotFound
 		}
-		return nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, err
 	}
 
 	user, err := utils.ConvertDBUserToModelsUser(userRaw)
@@ -124,15 +126,16 @@ func (ps *UserService) GetUserByPassportNumber(ctx context.Context, passportNumb
 	userRaw, err := ps.repository.GetUserByPassportNumber(ctx, passportNumber)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, ErrNoRows
+			return nil, ErrUserNotFound
 		}
-		return nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, err
 	}
 
 	user, err := utils.ConvertDBUserToModelsUser(userRaw)
 	if err != nil {
 		return nil, fmt.Errorf("Error converting user: %v", err)
 	}
+
 	return user, nil
 }
 
@@ -148,10 +151,13 @@ func (ps *UserService) UpdateUserByUUID(ctx context.Context, UUID uuid.UUID, pay
 
 	userRaw, err := ps.repository.UpdateUserByUUID(ctx, params)
 	if err != nil {
-		if pgError, ok := err.(*pgconn.PgError); ok && pgError.Code == "23505" {
-			return nil, ErrDuplicateEntry
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrUserNotFound
 		}
-		return nil, fmt.Errorf("failed to update user: %w", err)
+		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" {
+			return nil, ErrUserAlreadyExists
+		}
+		return nil, err
 	}
 
 	user, err := utils.ConvertDBUserToModelsUser(userRaw)
@@ -168,13 +174,13 @@ func (ps *UserService) DeleteUserByUUID(ctx context.Context, UUID uuid.UUID) err
 	_, err := ps.repository.GetUserByUUID(ctx, pgUUID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return ErrNoRows
+			return ErrUserNotFound
 		}
-		return fmt.Errorf("failed to get user: %w", err)
+		return err
 	}
 
 	if err := ps.repository.DeleteUserByUUID(ctx, pgUUID); err != nil {
-		return fmt.Errorf("failed to delete user: %w", err)
+		return err
 	}
 
 	return nil

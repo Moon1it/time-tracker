@@ -5,31 +5,35 @@ import (
 	"time-tracker/internal/handler"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func (s *Server) RegisterRoutes(h *handler.Handler) http.Handler {
 	r := gin.Default()
 
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	api := r.Group("/api")
 	{
-		// api.GET("/users/:id/workloads", h.GetUserWorkloads) // Получение трудозатрат по пользователю за период
-		// api.POST("/users/:id/tasks/start", h.StartTask)     // Начать отсчет времени по задаче для пользователя
-		// api.POST("/users/:id/tasks/stop", h.StopTask)       // Закончить отсчет времени по задаче для пользователя
+		users := api.Group("/users")
+		{
+			users.GET("/info", h.GetUserByPassportNumber) // Check for user existence by passportNumber
 
-		// api.GET("/info", h.GetUserByPassportNumber)
+			users.POST("", h.CreateUser)         // Add a new user
+			users.GET("", h.GetAllUsers)         // Get a list of users with filtering and pagination
+			users.GET("/:uuid", h.GetUser)       // Get user data by UUID
+			users.PATCH("/:uuid", h.UpdateUser)  // Update user data
+			users.DELETE("/:uuid", h.DeleteUser) // Delete a user
 
-		api.POST("/users", h.CreateUser)         // Добавление нового пользователя
-		api.GET("/users", h.GetUsers)            // Получение данных пользователей с фильтрацией и пагинацией
-		api.GET("/users/:uuid", h.GetUser)       // Добавление нового пользователя
-		api.PATCH("/users/:uuid", h.UpdateUser)  // Изменение данных пользователя
-		api.DELETE("/users/:uuid", h.DeleteUser) // Удаление пользователя
-
+			tasks := users.Group("/:uuid/tasks")
+			{
+				tasks.POST("/start", h.StartTimeTask)  // Start task time tracking for a user
+				tasks.POST("/stop", h.StopTimeTask)    // Stop task time tracking for a user
+				tasks.GET("/result", h.GetTasksResult) // Get users result for a period
+			}
+		}
 	}
 
 	return r
 }
-
-// api.GET("/users", h.GetUsers)                         // Получение списка пользователей с фильтрацией и пагинацией
-// api.GET("/user/time-tracking", h.GetUserTimeTracking) // Получение трудозатрат по пользователю за период
-// api.POST("/user/start-task", h.StartTask)             // Начало отсчета времени по задаче для пользователя
-// api.POST("/user/stop-task", h.StopTask)               // Завершение отсчета времени по задаче для пользователя

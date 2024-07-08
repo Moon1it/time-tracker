@@ -1,4 +1,4 @@
-# Time Tracker Project
+# Time Tracker Application
 
 ## Description
 

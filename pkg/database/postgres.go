@@ -3,20 +3,21 @@ package database
 import (
 	"context"
 	"fmt"
-	"os"
 	"time-tracker/internal/config"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func NewPostgresDB(cfg *config.Config) (*pgxpool.Pool, error) {
-	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable",
-		cfg.DBConfig.User, cfg.DBConfig.Password, cfg.DBConfig.Host, cfg.DBConfig.Port, cfg.DBConfig.DBName)
+	ctx := context.Background()
 
-	pgxPool, err := pgxpool.New(context.TODO(), connStr)
+	pgxPool, err := pgxpool.New(ctx, cfg.DBSource)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("unable to create connection pool: %w", err)
+	}
+
+	if err := pgxPool.Ping(ctx); err != nil {
+		return nil, fmt.Errorf("unable to ping database: %w", err)
 	}
 
 	return pgxPool, nil

@@ -11,11 +11,16 @@ import (
 )
 
 type Querier interface {
+	CreateTask(ctx context.Context, arg CreateTaskParams) (Task, error)
+	CreateTaskHistory(ctx context.Context, arg CreateTaskHistoryParams) (CreateTaskHistoryRow, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteTask(ctx context.Context, userUuid pgtype.UUID) error
 	DeleteUserByUUID(ctx context.Context, userUuid pgtype.UUID) error
+	GetTasksResultByPeriod(ctx context.Context, arg GetTasksResultByPeriodParams) ([]GetTasksResultByPeriodRow, error)
 	GetUserByPassportNumber(ctx context.Context, passportNumber string) (User, error)
 	GetUserByUUID(ctx context.Context, userUuid pgtype.UUID) (User, error)
 	GetUsers(ctx context.Context, arg GetUsersParams) ([]User, error)
+	UpdateTaskEndTime(ctx context.Context, userUuid pgtype.UUID) (Task, error)
 	UpdateUserByUUID(ctx context.Context, arg UpdateUserByUUIDParams) (User, error)
 }
 
