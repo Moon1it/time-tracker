@@ -54,14 +54,6 @@ VALUES
 ('2234 567197', 'Rybakov', 'Roman', NULL, 'ул. Есенина, д. 9, кв. 80, Челябинск'),
 ('5234 567823', 'Kovalev', 'Konstantin', 'Konstantinovich', 'ул. Некрасова, д. 10, кв. 90, Ростов-на-Дону');
 
--- Add current tasks for each user
-INSERT INTO tasks (user_uuid, name, start_time)
-SELECT
-    uuid,
-    'Current Task ' || row_number() OVER (ORDER BY uuid),
-    CURRENT_TIMESTAMP AT TIME ZONE 'UTC' + (interval '1 minute' * floor(random() * 60))
-FROM users;
-
 -- Add completed tasks for each user
 WITH task_intervals AS (
     SELECT interval '1 day' * 1 AS task_interval UNION ALL
@@ -82,3 +74,12 @@ SELECT
 FROM
     users u,
     task_intervals t;
+
+
+-- Add current tasks for each user
+INSERT INTO tasks (user_uuid, name, start_time)
+SELECT
+    uuid,
+    'Current Task ' || row_number() OVER (ORDER BY uuid),
+    (CURRENT_TIMESTAMP AT TIME ZONE 'UTC' - INTERVAL '7 days') + (interval '1 minute' * floor(random() * 60))
+FROM users;
