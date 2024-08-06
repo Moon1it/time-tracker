@@ -7,9 +7,9 @@
         "version": "1.0"
     },
     "host": "localhost:8000",
-    "basePath": "/",
+    "basePath": "/api",
     "paths": {
-        "/api/users": {
+        "/users": {
             "get": {
                 "description": "Retrieve a list of users with optional filters, limit, and offset.",
                 "consumes": [
@@ -125,7 +125,7 @@
                 }
             }
         },
-        "/api/users/info": {
+        "/users/info": {
             "get": {
                 "description": "Get user information by providing passport series and number.",
                 "consumes": [
@@ -137,7 +137,7 @@
                 "tags": [
                     "users"
                 ],
-                "summary": "People info",
+                "summary": "User info by passport",
                 "parameters": [
                     {
                         "type": "string",
@@ -182,9 +182,9 @@
                 }
             }
         },
-        "/api/users/{uuid}": {
+        "/users/{id}": {
             "get": {
-                "description": "Retrieve a user by their UUID.",
+                "description": "Retrieve a user by their id.",
                 "consumes": [
                     "application/json"
                 ],
@@ -194,12 +194,12 @@
                 "tags": [
                     "users"
                 ],
-                "summary": "Get user by UUID",
+                "summary": "Get user by id",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User UUID",
-                        "name": "uuid",
+                        "description": "User id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -232,7 +232,7 @@
                 }
             },
             "delete": {
-                "description": "Delete a user by their UUID.",
+                "description": "Delete a user by their id.",
                 "consumes": [
                     "application/json"
                 ],
@@ -242,12 +242,12 @@
                 "tags": [
                     "users"
                 ],
-                "summary": "Delete user by UUID",
+                "summary": "Delete user by id",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User UUID",
-                        "name": "uuid",
+                        "description": "User id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -280,7 +280,7 @@
                 }
             },
             "patch": {
-                "description": "Update a user's details by their UUID.",
+                "description": "Update a user's details by their id.",
                 "consumes": [
                     "application/json"
                 ],
@@ -290,12 +290,12 @@
                 "tags": [
                     "users"
                 ],
-                "summary": "Update user by UUID",
+                "summary": "Update user by id",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User UUID",
-                        "name": "uuid",
+                        "description": "User id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -343,7 +343,7 @@
                 }
             }
         },
-        "/api/users/{uuid}/tasks/result": {
+        "/users/{id}/tasks/result": {
             "get": {
                 "description": "Retrieve tasks result for a user within a specified time period",
                 "consumes": [
@@ -359,8 +359,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User UUID",
-                        "name": "uuid",
+                        "description": "User id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -410,7 +410,7 @@
                 }
             }
         },
-        "/api/users/{uuid}/tasks/start": {
+        "/users/{id}/tasks/start": {
             "post": {
                 "description": "Create a new task for a user",
                 "consumes": [
@@ -426,8 +426,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User UUID",
-                        "name": "uuid",
+                        "description": "User id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -455,7 +455,7 @@
                         }
                     },
                     "409": {
-                        "description": "Task with this user UUID already exists. Please complete the active task first.",
+                        "description": "Task with this user id already exists. Please complete the active task first.",
                         "schema": {
                             "$ref": "#/definitions/handler.errorResponse"
                         }
@@ -469,7 +469,7 @@
                 }
             }
         },
-        "/api/users/{uuid}/tasks/stop": {
+        "/users/{id}/tasks/stop": {
             "post": {
                 "description": "Stop an active task for a user",
                 "consumes": [
@@ -485,8 +485,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User UUID",
-                        "name": "uuid",
+                        "description": "User id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }

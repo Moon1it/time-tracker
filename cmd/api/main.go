@@ -14,15 +14,14 @@ import (
 // @title Time Tracker API
 // @version 1.0
 // @description API Server for Time Tracker Application
-
 // @host localhost:8000
-// @BasePath /
-
+// @BasePath /api
 func main() {
 	cfg, err := config.NewConfig()
 	if err != nil {
 		log.Fatalf("error loading env variables: %s", err.Error())
 	}
+
 	pgxPool, err := database.NewPostgresDB(cfg)
 	if err != nil {
 		log.Fatalf("error loading env variables: %s", err.Error())

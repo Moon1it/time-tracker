@@ -30,7 +30,7 @@ var UserParamsArr = [5]string{"passport_number", "name", "surname", "patronymic"
 // @Failure 400 {object} errorResponse "Bad request"
 // @Failure 409 {object} errorResponse "User already exists"
 // @Failure 500 {object} errorResponse "Internal server error"
-// @Router /api/users [post]
+// @Router /users [post]
 func (h *Handler) CreateUser(c *gin.Context) {
 	var payload models.CreateUserPayload
 	if err := c.BindJSON(&payload); err != nil {
@@ -73,7 +73,7 @@ func (h *Handler) CreateUser(c *gin.Context) {
 // @Failure 400 {object} errorResponse "Bad request"
 // @Failure 404 {object} errorResponse "No users found"
 // @Failure 500 {object} errorResponse "Internal server error"
-// @Router /api/users [get]
+// @Router /users [get]
 func (h *Handler) GetAllUsers(c *gin.Context) {
 	limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	if err != nil {
@@ -113,7 +113,7 @@ func (h *Handler) GetAllUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
-// @Summary People info
+// @Summary User info by passport
 // @Tags users
 // @Description Get user information by providing passport series and number.
 // @Accept  json
@@ -124,7 +124,7 @@ func (h *Handler) GetAllUsers(c *gin.Context) {
 // @Failure 400 {object} errorResponse "Bad request"
 // @Failure 404 {object} errorResponse "User not found"
 // @Failure 500 {object} errorResponse "Internal server error"
-// @Router /api/users/info [get]
+// @Router /users/info [get]
 func (h *Handler) GetUserByPassportNumber(c *gin.Context) {
 	passportSerieParam := c.Query("passportSerie")
 	passportNumberParam := c.Query("passportNumber")
@@ -159,20 +159,20 @@ func (h *Handler) GetUserByPassportNumber(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// @Summary Get user by UUID
+// @Summary Get user by id
 // @Tags users
-// @Description Retrieve a user by their UUID.
+// @Description Retrieve a user by their id.
 // @Accept  json
 // @Produce  json
-// @Param uuid path string true "User UUID"
+// @Param id path string true "User id"
 // @Success 200 {object} models.User "User retrieved successfully"
 // @Failure 400 {object} errorResponse "Bad request"
 // @Failure 404 {object} errorResponse "No users found"
 // @Failure 500 {object} errorResponse "Internal server error"
-// @Router /api/users/{uuid} [get]
+// @Router /users/{id} [get]
 func (h *Handler) GetUser(c *gin.Context) {
-	uuidString := c.Param("uuid")
-	uuid, err := uuid.Parse(uuidString)
+	userIDParam := c.Param("id")
+	userUUID, err := uuid.Parse(userIDParam)
 	if err != nil {
 		logrus.Errorf("Invalid UUID format: %v", err)
 		newErrorResponse(c, http.StatusBadRequest, "Bad request")
@@ -180,10 +180,10 @@ func (h *Handler) GetUser(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	user, err := h.service.IUserService.GetUserByUUID(ctx, uuid)
+	user, err := h.service.IUserService.GetUserByUUID(ctx, userUUID)
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFound) {
-			logrus.Infof("No user found for UUID: %s", uuidString)
+			logrus.Infof("No user found for UUID: %s", userUUID)
 			newErrorResponse(c, http.StatusNotFound, "No users found")
 			return
 		}
@@ -196,12 +196,12 @@ func (h *Handler) GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// @Summary Update user by UUID
+// @Summary Update user by id
 // @Tags users
-// @Description Update a user's details by their UUID.
+// @Description Update a user's details by their id.
 // @Accept  json
 // @Produce  json
-// @Param uuid path string true "User UUID"
+// @Param id path string true "User id"
 // @Param payload body models.UpdateUserPayload true "User Update Payload"
 // @Success 200 {object} models.User "User updated successfully"
 // @Success 200 {object} statusResponse "No fields to update"
@@ -209,7 +209,7 @@ func (h *Handler) GetUser(c *gin.Context) {
 // @Failure 404 {object} errorResponse "No users found"
 // @Failure 409 {object} errorResponse "User with this passportNumber already exists"
 // @Failure 500 {object} errorResponse "Internal server error"
-// @Router /api/users/{uuid} [patch]
+// @Router /users/{id} [patch]
 func (h *Handler) UpdateUser(c *gin.Context) {
 	var payload models.UpdateUserPayload
 	if err := c.BindJSON(&payload); err != nil {
@@ -218,8 +218,8 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	uuidString := c.Param("uuid")
-	uuid, err := uuid.Parse(uuidString)
+	userIDParam := c.Param("id")
+	userUUID, err := uuid.Parse(userIDParam)
 	if err != nil {
 		logrus.Errorf("Invalid UUID format: %v", err)
 		newErrorResponse(c, http.StatusBadRequest, "Bad request")
@@ -233,11 +233,11 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 		payload.Address != nil {
 
 		ctx := c.Request.Context()
-		user, err := h.service.IUserService.UpdateUserByUUID(ctx, uuid, &payload)
+		user, err := h.service.IUserService.UpdateUserByUUID(ctx, userUUID, &payload)
 		if err != nil {
 			logrus.Errorf("Error updating user: %v", err)
 			if errors.Is(err, service.ErrUserNotFound) {
-				logrus.Infof("No user found for UUID: %s", uuidString)
+				logrus.Infof("No user found for UUID: %s", userUUID)
 				newErrorResponse(c, http.StatusNotFound, "No users found")
 				return
 			}
@@ -255,34 +255,34 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	logrus.Infof("No fields to update for UUID: %s", uuidString)
+	logrus.Infof("No fields to update for UUID: %s", userUUID)
 	c.JSON(http.StatusOK, statusResponse{Description: "No fields to update"})
 }
 
-// @Summary Delete user by UUID
+// @Summary Delete user by id
 // @Tags users
-// @Description Delete a user by their UUID.
+// @Description Delete a user by their id.
 // @Accept  json
 // @Produce  json
-// @Param uuid path string true "User UUID"
+// @Param id path string true "User id"
 // @Success 200 {object} statusResponse "User deleted successfully"
 // @Failure 400 {object} errorResponse "Bad request"
 // @Failure 404 {object} errorResponse "No users found"
 // @Failure 500 {object} errorResponse "Internal server error"
-// @Router /api/users/{uuid} [delete]
+// @Router /users/{id} [delete]
 func (h *Handler) DeleteUser(c *gin.Context) {
-	uuidStr := c.Param("uuid")
-	UUID, err := uuid.Parse(uuidStr)
+	userIDParam := c.Param("id")
+	userUUID, err := uuid.Parse(userIDParam)
 	if err != nil {
 		logrus.Errorf("Invalid UUID format: %v", err)
 		newErrorResponse(c, http.StatusBadRequest, "Bad request")
 		return
 	}
 
-	err = h.service.IUserService.DeleteUserByUUID(context.Background(), UUID)
+	err = h.service.IUserService.DeleteUserByUUID(context.Background(), userUUID)
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFound) {
-			logrus.Infof("No user found for UUID: %s", uuidStr)
+			logrus.Infof("No user found for UUID: %s", userUUID)
 			newErrorResponse(c, http.StatusNotFound, "No users found")
 			return
 		}
@@ -291,7 +291,7 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	logrus.Infof("User deleted successfully: UUID=%s", uuidStr)
+	logrus.Infof("User deleted successfully: UUID=%s", userUUID)
 	c.JSON(http.StatusOK, statusResponse{Description: "User deleted successfully"})
 }
 

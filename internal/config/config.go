@@ -2,41 +2,29 @@ package config
 
 import (
 	"fmt"
-	"os"
+	"log"
 
+	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	DBSource   string
-	ServerPort string
-}
-
-func getEnv(key string) (string, error) {
-	value, ok := os.LookupEnv(key)
-	if !ok {
-		return "", fmt.Errorf("%s is required", key)
-	}
-	return value, nil
+	DBSource   string `env:"DB_SOURCE,required"`
+	ServerPort string `env:"SERVER_PORT,required"`
 }
 
 func NewConfig() (*Config, error) {
-	if err := godotenv.Load(); err != nil {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	cfg := new(Config)
+
+	err = env.Parse(cfg)
+	if err != nil {
+		fmt.Printf("%+v\n", err)
 		return nil, fmt.Errorf("error loading .env file: %w", err)
 	}
 
-	dbSource, err := getEnv("DB_SOURCE")
-	if err != nil {
-		return nil, err
-	}
-
-	serverPort, err := getEnv("SERVER_PORT")
-	if err != nil {
-		return nil, err
-	}
-
-	return &Config{
-		DBSource:   dbSource,
-		ServerPort: serverPort,
-	}, nil
+	return cfg, nil
 }

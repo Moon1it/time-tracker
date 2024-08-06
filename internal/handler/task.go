@@ -25,13 +25,13 @@ var validPeriods = map[string]interface{}{
 // @Tags         tasks
 // @Accept       json
 // @Produce      json
-// @Param        uuid     path      string                        true  "User UUID"
+// @Param        id     path      string                        true  "User id"
 // @Param        payload  body      models.CreateTaskPayload      true  "Task Payload"
 // @Success      201      {object}  models.Task                   "Task created successfully"
 // @Failure      400      {object}  errorResponse                 "Bad request"
-// @Failure      409      {object}  errorResponse                 "Task with this user UUID already exists. Please complete the active task first."
+// @Failure      409      {object}  errorResponse                 "Task with this user id already exists. Please complete the active task first."
 // @Failure      500      {object}  errorResponse                 "Internal server error"
-// @Router       /api/users/{uuid}/tasks/start [post]
+// @Router       /users/{id}/tasks/start [post]
 func (h *Handler) StartTimeTask(c *gin.Context) {
 	var payload models.CreateTaskPayload
 	if err := c.BindJSON(&payload); err != nil {
@@ -40,8 +40,8 @@ func (h *Handler) StartTimeTask(c *gin.Context) {
 		return
 	}
 
-	userUUIDString := c.Param("uuid")
-	userUUID, err := uuid.Parse(userUUIDString)
+	userIDParam := c.Param("id")
+	userUUID, err := uuid.Parse(userIDParam)
 	if err != nil {
 		logrus.Errorf("Invalid UUID format: %v", err)
 		newErrorResponse(c, http.StatusBadRequest, "Bad request")
@@ -56,7 +56,7 @@ func (h *Handler) StartTimeTask(c *gin.Context) {
 			newErrorResponse(c, http.StatusBadRequest, "Bad request")
 		}
 		if errors.Is(err, service.ErrTaskAlreadyExists) {
-			logrus.Warnf("Task with user UUID %s already exists: %v", userUUIDString, err)
+			logrus.Warnf("Task with user UUID %s already exists: %v", userUUID, err)
 			newErrorResponse(c, http.StatusConflict, "Task with this user UUID already exists. Please complete the active task first.")
 		}
 		logrus.Errorf("Error starting task: %v", err)
@@ -73,15 +73,15 @@ func (h *Handler) StartTimeTask(c *gin.Context) {
 // @Tags         tasks
 // @Accept       json
 // @Produce      json
-// @Param        uuid     path      string                        true  "User UUID"
+// @Param        id     path      string                        true  "User id"
 // @Success      200      {object}  models.Task                   "Task stopped successfully"
 // @Failure      400      {object}  errorResponse                 "Bad request"
 // @Failure      404      {object}  errorResponse                 "No users found or this user does not have an active task yet."
 // @Failure      500      {object}  errorResponse                 "Internal server error"
-// @Router /api/users/{uuid}/tasks/stop [post]
+// @Router /users/{id}/tasks/stop [post]
 func (h *Handler) StopTimeTask(c *gin.Context) {
-	userUUIDString := c.Param("uuid")
-	userUUID, err := uuid.Parse(userUUIDString)
+	userIDParam := c.Param("id")
+	userUUID, err := uuid.Parse(userIDParam)
 	if err != nil {
 		logrus.Errorf("Invalid UUID format: %v", err)
 		newErrorResponse(c, http.StatusBadRequest, "Bad request")
@@ -92,12 +92,12 @@ func (h *Handler) StopTimeTask(c *gin.Context) {
 	task, err := h.service.ITaskService.FinishTask(ctx, userUUID)
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFound) {
-			logrus.Infof("No user found for UUID: %s", userUUIDString)
+			logrus.Infof("No user found for UUID: %s", userUUID)
 			newErrorResponse(c, http.StatusNotFound, "No users found")
 			return
 		}
 		if errors.Is(err, service.ErrTaskNotFound) {
-			logrus.Warnf("No active task for user UUID %s: %v", userUUIDString, err)
+			logrus.Warnf("No active task for user UUID %s: %v", userUUID, err)
 			newErrorResponse(c, http.StatusNotFound, "This user does not have an active task yet.")
 			return
 		}
@@ -106,7 +106,7 @@ func (h *Handler) StopTimeTask(c *gin.Context) {
 		return
 	}
 
-	logrus.Infof("Task stopped successfully for user UUID: %s", userUUIDString)
+	logrus.Infof("Task stopped successfully for user UUID: %s", userUUID)
 	c.JSON(http.StatusOK, task)
 }
 
@@ -115,7 +115,7 @@ func (h *Handler) StopTimeTask(c *gin.Context) {
 // @Tags tasks
 // @Accept  json
 // @Produce  json
-// @Param uuid path string true "User UUID"
+// @Param id path string true "User id"
 // @Param timePeriod query string false "Time period ('day', 'week', 'month', 'year')" default(day)
 // @Param timeAmount query string false "Amount of time" default(1)
 // @Success 200 {object} models.TasksResult "Tasks retrieved successfully"
@@ -123,10 +123,10 @@ func (h *Handler) StopTimeTask(c *gin.Context) {
 // @Failure 400 {object} errorResponse "Bad request"
 // @Failure 404 {object} errorResponse "User not found"
 // @Failure 500 {object} errorResponse "Internal server error"
-// @Router /api/users/{uuid}/tasks/result [get]
+// @Router /users/{id}/tasks/result [get]
 func (h *Handler) GetTasksResult(c *gin.Context) {
-	userUUIDString := c.Param("uuid")
-	userUUID, err := uuid.Parse(userUUIDString)
+	userIDParam := c.Param("id")
+	userUUID, err := uuid.Parse(userIDParam)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "Bad request")
 		return
@@ -150,12 +150,12 @@ func (h *Handler) GetTasksResult(c *gin.Context) {
 	task, err := h.service.ITaskService.GetTasksResult(ctx, userUUID, days)
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFound) {
-			logrus.Infof("No user found for UUID: %s", userUUIDString)
+			logrus.Infof("No user found for UUID: %s", userUUID)
 			newErrorResponse(c, http.StatusNotFound, "User not found")
 			return
 		}
 		if errors.Is(err, service.ErrTaskNotFound) {
-			logrus.Infof("No tasks found for the specified period for user UUID: %s", userUUIDString)
+			logrus.Infof("No tasks found for the specified period for user UUID: %s", userUUID)
 			c.JSON(http.StatusNoContent, nil)
 			return
 		}

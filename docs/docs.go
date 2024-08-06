@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/users": {
+        "/users": {
             "get": {
                 "description": "Retrieve a list of users with optional filters, limit, and offset.",
                 "consumes": [
@@ -131,7 +131,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/users/info": {
+        "/users/info": {
             "get": {
                 "description": "Get user information by providing passport series and number.",
                 "consumes": [
@@ -143,7 +143,7 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "People info",
+                "summary": "User info by passport",
                 "parameters": [
                     {
                         "type": "string",
@@ -188,9 +188,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/users/{uuid}": {
+        "/users/{id}": {
             "get": {
-                "description": "Retrieve a user by their UUID.",
+                "description": "Retrieve a user by their id.",
                 "consumes": [
                     "application/json"
                 ],
@@ -200,12 +200,12 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Get user by UUID",
+                "summary": "Get user by id",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User UUID",
-                        "name": "uuid",
+                        "description": "User id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -238,7 +238,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete a user by their UUID.",
+                "description": "Delete a user by their id.",
                 "consumes": [
                     "application/json"
                 ],
@@ -248,12 +248,12 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Delete user by UUID",
+                "summary": "Delete user by id",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User UUID",
-                        "name": "uuid",
+                        "description": "User id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -286,7 +286,7 @@ const docTemplate = `{
                 }
             },
             "patch": {
-                "description": "Update a user's details by their UUID.",
+                "description": "Update a user's details by their id.",
                 "consumes": [
                     "application/json"
                 ],
@@ -296,12 +296,12 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Update user by UUID",
+                "summary": "Update user by id",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User UUID",
-                        "name": "uuid",
+                        "description": "User id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -349,7 +349,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/users/{uuid}/tasks/result": {
+        "/users/{id}/tasks/result": {
             "get": {
                 "description": "Retrieve tasks result for a user within a specified time period",
                 "consumes": [
@@ -365,8 +365,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User UUID",
-                        "name": "uuid",
+                        "description": "User id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -416,7 +416,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/users/{uuid}/tasks/start": {
+        "/users/{id}/tasks/start": {
             "post": {
                 "description": "Create a new task for a user",
                 "consumes": [
@@ -432,8 +432,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User UUID",
-                        "name": "uuid",
+                        "description": "User id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -461,7 +461,7 @@ const docTemplate = `{
                         }
                     },
                     "409": {
-                        "description": "Task with this user UUID already exists. Please complete the active task first.",
+                        "description": "Task with this user id already exists. Please complete the active task first.",
                         "schema": {
                             "$ref": "#/definitions/handler.errorResponse"
                         }
@@ -475,7 +475,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/users/{uuid}/tasks/stop": {
+        "/users/{id}/tasks/stop": {
             "post": {
                 "description": "Stop an active task for a user",
                 "consumes": [
@@ -491,8 +491,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User UUID",
-                        "name": "uuid",
+                        "description": "User id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -672,7 +672,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8000",
-	BasePath:         "/",
+	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Time Tracker API",
 	Description:      "API Server for Time Tracker Application",

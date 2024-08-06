@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+
 	"time-tracker/internal/handler"
 
 	"github.com/gin-gonic/gin"
@@ -20,17 +21,21 @@ func (s *Server) RegisterRoutes(h *handler.Handler) http.Handler {
 		{
 			users.GET("/info", h.GetUserByPassportNumber) // Check for user existence by passportNumber
 
-			users.POST("", h.CreateUser)         // Add a new user
-			users.GET("", h.GetAllUsers)         // Get a list of users with filtering and pagination
-			users.GET("/:uuid", h.GetUser)       // Get user data by UUID
-			users.PATCH("/:uuid", h.UpdateUser)  // Update user data
-			users.DELETE("/:uuid", h.DeleteUser) // Delete a user
+			users.POST("", h.CreateUser) // Add a new user
+			users.GET("", h.GetAllUsers) // Get a list of users with filtering and pagination
 
-			tasks := users.Group("/:uuid/tasks")
+			userID := users.Group("/:id")
 			{
-				tasks.POST("/start", h.StartTimeTask)  // Start task time tracking for a user
-				tasks.POST("/stop", h.StopTimeTask)    // Stop task time tracking for a user
-				tasks.GET("/result", h.GetTasksResult) // Get users result for a period
+				userID.GET("", h.GetUser)       // Get a user data by user id
+				userID.PATCH("", h.UpdateUser)  // Update a user data by user id
+				userID.DELETE("", h.DeleteUser) // Delete a user by user id
+
+				tasks := userID.Group("/tasks")
+				{
+					tasks.POST("/start", h.StartTimeTask)  // Start task time tracking for a user
+					tasks.POST("/stop", h.StopTimeTask)    // Stop task time tracking for a user
+					tasks.GET("/result", h.GetTasksResult) // Get users result for a period
+				}
 			}
 		}
 	}
